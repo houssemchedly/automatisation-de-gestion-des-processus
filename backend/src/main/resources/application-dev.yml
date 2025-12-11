@@ -1,0 +1,65 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/test_api_network
+    username: username
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+     ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: houssemchedly3@gmail.com
+    password: ygpc bzgj feca kgmq
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+
+camunda:
+  bpm:
+    webapp:
+     enabled: true
+     database:
+       schema-update: true
+     admin-user:
+       id: admin
+       password: admin
+       firstName: Admin
+       lastName: User
+     filter:
+       create: All Tasks
+     run:
+       enabled: false
+
+application:
+  security:
+    jwt:
+      secret-key: NzI2ZmIzNzRmYTg1ZDcxMzIzODc3YjRkNTcwMzNkNzU3OGI2MzYyZg==
+      expiration: 8640000
+  mailing:
+    frontend:
+      activation-url: http://localhost:4200/activate-account
+server:
+  port: 8088
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    health:
+      show-details: always

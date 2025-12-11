@@ -1,0 +1,1238 @@
+{
+  "info": {
+    "name": "Test API - Complete Collection",
+    "description": "Comprehensive Postman collection for testing all API endpoints with JWT authentication",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8088/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 202\", function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Doe\",\n  \"prenom\": \"John\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has token\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.token).to.exist;",
+                  "    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/authenticate",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "authenticate"]
+            }
+          }
+        },
+        {
+          "name": "Activate Account",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/auth/activate-account?token=activation_token_here",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "activate-account"],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "activation_token_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 User Management",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/users?page=0&size=10&sort=id&direction=asc",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "id"
+                },
+                {
+                  "key": "direction",
+                  "value": "asc"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Smith\",\n  \"prenom\": \"Jane\",\n  \"email\": \"jane.smith@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Smith Updated\",\n  \"prenom\": \"Jane Updated\",\n  \"email\": \"jane.updated@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Toggle User Status",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/users/1/toggle-status",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1", "toggle-status"]
+            }
+          }
+        },
+        {
+          "name": "Assign Role to User",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/users/1/roles/1",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1", "roles", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 Project Management",
+      "item": [
+        {
+          "name": "Create Project",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"New Project\",\n  \"description\": \"Project description\",\n  \"dateDebut\": \"2024-01-01\",\n  \"dateFin\": \"2024-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projets",
+              "host": ["{{base_url}}"],
+              "path": ["projets"]
+            }
+          }
+        },
+        {
+          "name": "Get All Projects",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/projets?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["projets"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Project by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/projets/1",
+              "host": ["{{base_url}}"],
+              "path": ["projets", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get My Projects",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/projets/owner?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["projets", "owner"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Updated Project\",\n  \"description\": \"Updated description\",\n  \"dateDebut\": \"2024-01-01\",\n  \"dateFin\": \"2024-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/projets/update/1",
+              "host": ["{{base_url}}"],
+              "path": ["projets", "update", "1"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Project Status",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/projets/actif/1",
+              "host": ["{{base_url}}"],
+              "path": ["projets", "actif", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/projets/1",
+              "host": ["{{base_url}}"],
+              "path": ["projets", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏃‍♂️ Sprint Management",
+      "item": [
+        {
+          "name": "Create Sprint",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Sprint 1\",\n  \"description\": \"First sprint\",\n  \"dateDebut\": \"2024-01-01\",\n  \"dateFin\": \"2024-01-14\",\n  \"statut\": \"PLANIFIE\",\n  \"projetId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sprints/add",
+              "host": ["{{base_url}}"],
+              "path": ["sprints", "add"]
+            }
+          }
+        },
+        {
+          "name": "Get All Sprints",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/sprints?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["sprints"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Sprint by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/sprints/1",
+              "host": ["{{base_url}}"],
+              "path": ["sprints", "1"]
+            }
+          }
+        },
+        {
+          "name": "Search Sprints",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/sprints/search?nom=Sprint&statut=PLANIFIE&page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["sprints", "search"],
+              "query": [
+                {
+                  "key": "nom",
+                  "value": "Sprint"
+                },
+                {
+                  "key": "statut",
+                  "value": "PLANIFIE"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Sprints",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/sprints/active",
+              "host": ["{{base_url}}"],
+              "path": ["sprints", "active"]
+            }
+          }
+        },
+        {
+          "name": "Update Sprint",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Updated Sprint 1\",\n  \"description\": \"Updated first sprint\",\n  \"dateDebut\": \"2024-01-01\",\n  \"dateFin\": \"2024-01-14\",\n  \"statut\": \"EN_COURS\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sprints/1",
+              "host": ["{{base_url}}"],
+              "path": ["sprints", "1"]
+            }
+          }
+        },
+        {
+          "name": "Change Sprint Status",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/sprints/1/statut?statut=EN_COURS",
+              "host": ["{{base_url}}"],
+              "path": ["sprints", "1", "statut"],
+              "query": [
+                {
+                  "key": "statut",
+                  "value": "EN_COURS"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Sprint",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/sprints/1",
+              "host": ["{{base_url}}"],
+              "path": ["sprints", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "✅ Task Management",
+      "item": [
+        {
+          "name": "Create Task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"New Task\",\n  \"description\": \"Task description\",\n  \"statut\": \"A_FAIRE\",\n  \"priorite\": \"MOYENNE\",\n  \"userStoryId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/taches",
+              "host": ["{{base_url}}"],
+              "path": ["taches"]
+            }
+          }
+        },
+        {
+          "name": "Get All Tasks",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/taches?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["taches"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Task by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/taches/1",
+              "host": ["{{base_url}}"],
+              "path": ["taches", "1"]
+            }
+          }
+        },
+        {
+          "name": "Search Tasks",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/taches/search?titre=Task&statut=A_FAIRE&page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["taches", "search"],
+              "query": [
+                {
+                  "key": "titre",
+                  "value": "Task"
+                },
+                {
+                  "key": "statut",
+                  "value": "A_FAIRE"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Tasks",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/taches/mes-taches?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["taches", "mes-taches"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Task",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Updated Task\",\n  \"description\": \"Updated task description\",\n  \"statut\": \"EN_COURS\",\n  \"priorite\": \"HAUTE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/taches/1",
+              "host": ["{{base_url}}"],
+              "path": ["taches", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Task Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"TERMINE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/taches/1/statut",
+              "host": ["{{base_url}}"],
+              "path": ["taches", "1", "statut"]
+            }
+          }
+        },
+        {
+          "name": "Assign Task",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/taches/1/assign",
+              "host": ["{{base_url}}"],
+              "path": ["taches", "1", "assign"]
+            }
+          }
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/taches/1",
+              "host": ["{{base_url}}"],
+              "path": ["taches", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🤝 Meeting Management",
+      "item": [
+        {
+          "name": "Create Meeting",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Sprint Planning\",\n  \"description\": \"Planning meeting for next sprint\",\n  \"dateHeure\": \"2024-01-15T10:00:00\",\n  \"duree\": 60,\n  \"type\": \"SPRINT_PLANNING\",\n  \"projetId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/meetings",
+              "host": ["{{base_url}}"],
+              "path": ["meetings"]
+            }
+          }
+        },
+        {
+          "name": "Get All Meetings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/meetings?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["meetings"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Meeting by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/meetings/1",
+              "host": ["{{base_url}}"],
+              "path": ["meetings", "1"]
+            }
+          }
+        },
+        {
+          "name": "Get My Meetings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/meetings/my-meetings?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["meetings", "my-meetings"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Upcoming Meetings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/meetings/upcoming",
+              "host": ["{{base_url}}"],
+              "path": ["meetings", "upcoming"]
+            }
+          }
+        },
+        {
+          "name": "Get Today's Meetings",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/meetings/today",
+              "host": ["{{base_url}}"],
+              "path": ["meetings", "today"]
+            }
+          }
+        },
+        {
+          "name": "Update Meeting",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Updated Sprint Planning\",\n  \"description\": \"Updated planning meeting\",\n  \"dateHeure\": \"2024-01-15T14:00:00\",\n  \"duree\": 90,\n  \"type\": \"SPRINT_PLANNING\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/meetings/1",
+              "host": ["{{base_url}}"],
+              "path": ["meetings", "1"]
+            }
+          }
+        },
+        {
+          "name": "Add Participant",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/meetings/1/participants/2",
+              "host": ["{{base_url}}"],
+              "path": ["meetings", "1", "participants", "2"]
+            }
+          }
+        },
+        {
+          "name": "Remove Participant",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/meetings/1/participants/2",
+              "host": ["{{base_url}}"],
+              "path": ["meetings", "1", "participants", "2"]
+            }
+          }
+        },
+        {
+          "name": "Delete Meeting",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/meetings/1",
+              "host": ["{{base_url}}"],
+              "path": ["meetings", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"New Task Assigned\",\n  \"message\": \"You have been assigned a new task\",\n  \"type\": \"TASK_ASSIGNMENT\",\n  \"userId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/notifications?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/notifications/unread?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "unread"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/notifications/unread-count",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "unread-count"]
+            }
+          }
+        },
+        {
+          "name": "Mark as Read",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/notifications/1/read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "1", "read"]
+            }
+          }
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{base_url}}/notifications/mark-all-read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "mark-all-read"]
+            }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/notifications/1",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎯 User Stories",
+      "item": [
+        {
+          "name": "Create User Story",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"User Login\",\n  \"description\": \"As a user, I want to login to access my account\",\n  \"priorite\": \"HAUTE\",\n  \"statut\": \"A_FAIRE\",\n  \"productBacklogId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/user-stories",
+              "host": ["{{base_url}}"],
+              "path": ["user-stories"]
+            }
+          }
+        },
+        {
+          "name": "Get All User Stories",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/user-stories?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["user-stories"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Story by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/user-stories/1",
+              "host": ["{{base_url}}"],
+              "path": ["user-stories", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update User Story",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Updated User Login\",\n  \"description\": \"Updated: As a user, I want to login securely\",\n  \"priorite\": \"HAUTE\",\n  \"statut\": \"EN_COURS\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/user-stories/1",
+              "host": ["{{base_url}}"],
+              "path": ["user-stories", "1"]
+            }
+          }
+        },
+        {
+          "name": "Delete User Story",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/user-stories/1",
+              "host": ["{{base_url}}"],
+              "path": ["user-stories", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📝 Product Backlog",
+      "item": [
+        {
+          "name": "Create Product Backlog",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Main Product Backlog\",\n  \"description\": \"Primary backlog for the project\",\n  \"projetId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/product-backlogs",
+              "host": ["{{base_url}}"],
+              "path": ["product-backlogs"]
+            }
+          }
+        },
+        {
+          "name": "Get All Product Backlogs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/product-backlogs?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["product-backlogs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product Backlog by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/product-backlogs/1",
+              "host": ["{{base_url}}"],
+              "path": ["product-backlogs", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚫 Blockers",
+      "item": [
+        {
+          "name": "Create Blocker",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Database Connection Issue\",\n  \"description\": \"Cannot connect to production database\",\n  \"statut\": \"OUVERT\",\n  \"priorite\": \"HAUTE\",\n  \"tacheId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/blocages",
+              "host": ["{{base_url}}"],
+              "path": ["blocages"]
+            }
+          }
+        },
+        {
+          "name": "Get All Blockers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/blocages?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["blocages"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Blocker by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/blocages/1",
+              "host": ["{{base_url}}"],
+              "path": ["blocages", "1"]
+            }
+          }
+        },
+        {
+          "name": "Update Blocker Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"RESOLU\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/blocages/1/statut",
+              "host": ["{{base_url}}"],
+              "path": ["blocages", "1", "statut"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔑 Roles",
+      "item": [
+        {
+          "name": "Get All Roles",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/roles",
+              "host": ["{{base_url}}"],
+              "path": ["roles"]
+            }
+          }
+        },
+        {
+          "name": "Create Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"DEVELOPER\",\n  \"description\": \"Software Developer Role\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/roles",
+              "host": ["{{base_url}}"],
+              "path": ["roles"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
