@@ -18,7 +18,7 @@ import { ModalDismissReasons, NgbModal, NgbModalModule } from "@ng-bootstrap/ng-
 import { EditBoardComponent } from "../edit-board/edit-board.component"
 import { AddTaskComponent } from "../add-task/add-task.component"
 import { TaskTypeEnum } from "../../../models/enum/task.enum"
-import { CommonModule } from "@angular/common"
+
 import { KanbanViewComponent } from "../kanban-view/kanban-view.component"
 import { TableViewComponent } from "../table-view/table-view.component"
 import { AppTopbar } from "../../../layout/component/app.topbar"
@@ -29,7 +29,6 @@ import { AppSidebar } from "../../../layout/component/app.sidebar"
     selector: "app-main-view",
     standalone: true,
     imports: [
-    CommonModule,
     FontAwesomeModule,
     KanbanViewComponent,
     TableViewComponent,

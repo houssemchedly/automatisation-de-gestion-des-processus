@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core"
 import { ActivatedRoute, Router } from "@angular/router"
-import { Location, CommonModule } from "@angular/common"
+import { Location, CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms"
 import { AppTopbar } from "../../../../layout/component/app.topbar"
 import { AppSidebar } from "../../../../layout/component/app.sidebar"

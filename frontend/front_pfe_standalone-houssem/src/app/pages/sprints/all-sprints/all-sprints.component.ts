@@ -1,5 +1,5 @@
 import { Component, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
+
 import { FormsModule } from "@angular/forms"
 import { ButtonModule } from "primeng/button"
 import { TableModule } from "primeng/table"
@@ -45,7 +45,6 @@ interface Sprint {
   selector: "app-sprints",
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ButtonModule,
     TableModule,
@@ -60,8 +59,8 @@ interface Sprint {
     ToastModule,
     ConfirmDialogModule,
     MessageModule,
-    ProgressSpinnerModule,
-  ],
+    ProgressSpinnerModule
+],
   templateUrl: "./all-sprints.component.html",
   styleUrl: "./all-sprints.component.scss",
   providers: [MessageService, ConfirmationService],

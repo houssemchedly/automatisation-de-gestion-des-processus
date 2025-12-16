@@ -16,14 +16,14 @@ import {
 import { FormsModule, ReactiveFormsModule } from "@angular/forms"
 import { SubTask } from "../../../models/sub-task.model"
 import { TaskTypeEnum } from "../../../models/enum/task.enum"
-import { CommonModule } from "@angular/common"
+
 import { PriorityEnum } from "../../../models/enum/priority.enum"
 import { NgbActiveModal } from "@ng-bootstrap/ng-bootstrap"
 
 @Component({
     selector: "app-add-task",
     standalone: true,
-    imports: [CommonModule, FontAwesomeModule, ReactiveFormsModule, FormsModule],
+    imports: [FontAwesomeModule, ReactiveFormsModule, FormsModule],
     templateUrl: "./add-task.component.html",
     styleUrl: "./add-task.component.scss",
 })

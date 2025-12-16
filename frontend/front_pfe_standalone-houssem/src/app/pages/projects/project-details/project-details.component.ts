@@ -1,6 +1,6 @@
 import { Component, type OnInit } from "@angular/core"
 import  { ActivatedRoute, Router } from "@angular/router"
-import {  Location, CommonModule } from "@angular/common"
+import { Location, CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms"
 
 import { ButtonModule } from "primeng/button"

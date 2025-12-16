@@ -1,12 +1,12 @@
 import { Component, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
+
 import { ChartModule } from "primeng/chart"
 import { CardModule } from "primeng/card"
 
 @Component({
   selector: "app-scrum-master-statistics",
   standalone: true,
-  imports: [CommonModule, ChartModule, CardModule],
+  imports: [ChartModule, CardModule],
   template: `
     <div class="statistics-container">
       <h1>Scrum Master Statistics</h1>

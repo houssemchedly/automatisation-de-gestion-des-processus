@@ -1,5 +1,5 @@
 import { Component, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
+
 import { FormsModule } from "@angular/forms"
 import { ButtonModule } from "primeng/button"
 import { TableModule } from "primeng/table"
@@ -20,7 +20,6 @@ import  { BacklogItemService, ProductBacklogService } from "../../services/servi
   selector: "app-backlog-items",
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ButtonModule,
     TableModule,
@@ -30,8 +29,8 @@ import  { BacklogItemService, ProductBacklogService } from "../../services/servi
     InputNumberModule,
     TagModule,
     ToastModule,
-    ConfirmDialogModule,
-  ],
+    ConfirmDialogModule
+],
   templateUrl: "./backlogitems.component.html",
   styleUrl: "./backlogitems.component.scss",
   providers: [MessageService, ConfirmationService],

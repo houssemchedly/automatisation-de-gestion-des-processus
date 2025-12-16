@@ -9,7 +9,7 @@ import { MessageService } from "primeng/api"
 import { AppTopbar } from "../../../layout/component/app.topbar"
 import { AppSidebar } from "../../../layout/component/app.sidebar"
 import { Router } from "@angular/router"
-import { CommonModule } from "@angular/common"
+
 import { Location } from "@angular/common"
 
 interface Project {
@@ -31,7 +31,6 @@ interface DropdownOption {
   selector: "app-add-project",
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     AppTopbar,
     AppSidebar,
@@ -39,8 +38,8 @@ interface DropdownOption {
     InputTextModule,
     InputTextarea,
     DropdownModule,
-    ToastModule,
-  ],
+    ToastModule
+],
   providers: [MessageService],
   templateUrl: "./add-project.component.html",
   styleUrls: ["./add-project.component.scss"],

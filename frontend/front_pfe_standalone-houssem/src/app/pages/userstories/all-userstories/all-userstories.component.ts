@@ -1,5 +1,5 @@
 import { Component, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
+
 import { FormsModule } from "@angular/forms"
 
 import { ButtonModule } from "primeng/button"
@@ -26,7 +26,6 @@ import { AppSidebar } from "../../../layout/component/app.sidebar"
   selector: "app-user-stories",
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     AppTopbar,
     AppSidebar,
@@ -41,8 +40,8 @@ import { AppSidebar } from "../../../layout/component/app.sidebar"
     ToastModule,
     ConfirmDialogModule,
     IconFieldModule,
-    InputIconModule,
-  ],
+    InputIconModule
+],
   templateUrl: "./all-userstories.component.html",
   styleUrl: "./all-userstories.component.scss",
   providers: [MessageService, ConfirmationService],

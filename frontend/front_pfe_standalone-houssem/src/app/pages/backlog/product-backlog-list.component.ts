@@ -1,5 +1,5 @@
 import { Component, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
+
 import { FormsModule } from "@angular/forms"
 import { ButtonModule } from "primeng/button"
 import { TableModule } from "primeng/table"
@@ -18,7 +18,6 @@ import  { ProductBacklogService, ProjetService } from "../../services/services"
   selector: "app-product-backlog-list",
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ButtonModule,
     TableModule,
@@ -27,8 +26,8 @@ import  { ProductBacklogService, ProjetService } from "../../services/services"
     DropdownModule,
     TagModule,
     ToastModule,
-    ConfirmDialogModule,
-  ],
+    ConfirmDialogModule
+],
   template: `
     <div class="container">
       <!-- Header -->

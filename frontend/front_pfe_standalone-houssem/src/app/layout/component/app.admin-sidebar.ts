@@ -1,12 +1,12 @@
 import { Component, ElementRef } from "@angular/core"
-import { CommonModule } from "@angular/common"
+
 import  { Router } from "@angular/router"
 import { RippleModule } from "primeng/ripple"
 
 @Component({
   selector: "app-admin-sidebar",
   standalone: true,
-  imports: [CommonModule, RippleModule],
+  imports: [RippleModule],
   template: `
         <div class="layout-sidebar">
             <div class="layout-menu">

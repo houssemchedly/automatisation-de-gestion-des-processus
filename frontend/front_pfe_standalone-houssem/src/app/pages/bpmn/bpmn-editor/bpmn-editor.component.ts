@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+
 import { FormsModule } from '@angular/forms';
 
 import { MessageService } from 'primeng/api';
@@ -11,8 +12,9 @@ import { DialogModule } from 'primeng/dialog';
 import { BpmnService, BpmnModelResponse } from '../../../services/services/bpmn.service';
 import { Subject, takeUntil } from 'rxjs';
 import BpmnModeler from 'bpmn-js/lib/Modeler';
-import propertiesPanelModule from 'bpmn-js-properties-panel';
-import camundaPropertiesProviderModule from 'bpmn-js-properties-panel/lib/provider/camunda';
+import PropertiesPanelModule from 'bpmn-js-properties-panel/dist';
+
+
 import minimapModule from 'diagram-js-minimap';
 import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda';
 
@@ -37,13 +39,13 @@ import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda';
             <button pButton type="button" label="Zoom Out" icon="pi pi-minus" (click)="zoomOut()" class="p-button-text" [disabled]="isImporting"></button>
             <button pButton type="button" label="Fit" icon="pi pi-arrows-alt" (click)="resetZoom()" class="p-button-text" [disabled]="isImporting"></button>
           </div>
-
+    
           <div class="toolbar-group">
             <input #fileInput type="file" accept=".bpmn,.xml" (change)="onFileSelected($event)" hidden />
             <button pButton type="button" label="Open XML" icon="pi pi-folder-open" (click)="triggerFileInput()" class="p-button-outlined" [disabled]="isImporting"></button>
             <button pButton type="button" label="Download XML" icon="pi pi-download" (click)="downloadXml()" class="p-button-outlined" [disabled]="isImporting"></button>
           </div>
-
+    
           <div class="toolbar-group">
             <button pButton type="button" label="Save" icon="pi pi-save" (click)="saveModel()" class="p-button-primary" [disabled]="isSaving || isImporting"></button>
             <button pButton type="button" label="Validate" icon="pi pi-check" (click)="validateModel()" class="p-button-info" [disabled]="isValidating || isImporting"></button>
@@ -52,13 +54,13 @@ import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda';
           </div>
         </div>
       </div>
-
+    
       <div class="editor-content">
         <div class="canvas-wrapper">
           <div #canvas class="canvas" id="canvas"></div>
-          <div class="helper-text" *ngIf="isImporting">Loading diagram...</div>
+          <div *ngIf="isImporting" class="helper-text">Loading diagram...</div>
         </div>
-
+    
         <div class="editor-properties">
           <div class="properties-header">Properties</div>
           <div class="properties-content">
@@ -81,7 +83,7 @@ import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda';
           </div>
         </div>
       </div>
-
+    
       <!-- Deployment Dialog -->
       <p-dialog [(visible)]="deploymentDialog" header="Deploy Model" [modal]="true" [style]="{width: '50vw'}">
         <div class="deployment-info">
@@ -94,7 +96,7 @@ import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda';
         </ng-template>
       </p-dialog>
     </div>
-  `,
+    `,
   styles: [`
     .bpmn-editor-container {
       display: flex;
@@ -334,8 +336,8 @@ export class BpmnEditorComponent implements OnInit, AfterViewInit, OnDestroy {
         parent: this.propertiesPanel.nativeElement
       },
       additionalModules: [
-        propertiesPanelModule,
-        camundaPropertiesProviderModule,
+        PropertiesPanelModule,
+        
         minimapModule
       ],
       moddleExtensions: {
@@ -360,7 +362,7 @@ export class BpmnEditorComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isImporting = true;
     try {
       const result = await this.bpmnModeler.importXML(xml);
-      this.bpmnModeler.get('canvas').zoom('fit-viewport');
+      (this.bpmnModeler.get('canvas') as any).zoom('fit-viewport');
       this.updateUndoRedo();
 
       if (result?.warnings?.length) {
@@ -558,7 +560,13 @@ export class BpmnEditorComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isValidating = true;
 
     try {
-      const { xml } = await this.bpmnModeler.saveXML({ format: true });
+      const result = await this.bpmnModeler.saveXML({ format: true });
+      const xml = result.xml || '';
+      if (!xml) {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to generate BPMN XML for validation' });
+        this.isValidating = false;
+        return;
+      }
       this.bpmnService.validateBpmnXml(xml).subscribe({
         next: (response) => {
           if (response.valid) {
@@ -600,7 +608,12 @@ export class BpmnEditorComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     try {
-      const { xml } = await this.bpmnModeler.saveXML({ format: true });
+      const result = await this.bpmnModeler.saveXML({ format: true });
+      const xml = result.xml || '';
+      if (!xml) {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to export BPMN XML' });
+        return;
+      }
       const blob = new Blob([xml], { type: 'text/xml' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -643,13 +656,13 @@ export class BpmnEditorComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   resetZoom() {
-    this.bpmnModeler?.get('canvas').zoom('fit-viewport');
+    (this.bpmnModeler?.get('canvas') as any).zoom('fit-viewport');
   }
 
   private adjustZoom(delta: number) {
     if (!this.bpmnModeler) return;
 
-    const canvas = this.bpmnModeler.get('canvas');
+    const canvas: any = this.bpmnModeler.get('canvas');
     const currentZoom = canvas.zoom();
     const newZoom = Math.max(0.2, currentZoom + delta);
     canvas.zoom(newZoom);

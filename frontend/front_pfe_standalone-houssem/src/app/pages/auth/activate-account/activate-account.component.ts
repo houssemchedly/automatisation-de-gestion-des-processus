@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../../../services/services/authentication.service';
 import { CodeInputModule } from 'angular-code-input';
-import { NgIf } from '@angular/common';
+
 @Component({
     selector: 'app-activate-account',
-    imports: [CodeInputModule, NgIf],
+    imports: [CodeInputModule],
     templateUrl: './activate-account.component.html',
     styleUrl: './activate-account.component.scss'
 })

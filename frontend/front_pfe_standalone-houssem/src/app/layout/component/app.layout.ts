@@ -13,17 +13,21 @@ import  { LayoutService } from "../service/layout.service"
   standalone: true,
   imports: [CommonModule, AppTopbar, AppSidebar, AppAdminSidebar, RouterModule, AppFooter],
   template: `<div class="layout-wrapper" [ngClass]="containerClass">
-        <app-topbar></app-topbar>
-        <app-admin-sidebar *ngIf="isAdminRoute"></app-admin-sidebar>
-        <app-sidebar *ngIf="!isAdminRoute"></app-sidebar>
-        <div class="layout-main-container">
+          <app-topbar></app-topbar>
+          @if (isAdminRoute) {
+            <app-admin-sidebar></app-admin-sidebar>
+          }
+          @if (!isAdminRoute) {
+            <app-sidebar></app-sidebar>
+          }
+          <div class="layout-main-container">
             <div class="layout-main">
-                <router-outlet></router-outlet>
+              <router-outlet></router-outlet>
             </div>
             <app-footer></app-footer>
-        </div>
-        <div class="layout-mask animate-fadein"></div>
-    </div> `,
+          </div>
+          <div class="layout-mask animate-fadein"></div>
+        </div>`,
 })
 export default class AppLayout {
   overlayMenuOpenSubscription: Subscription

@@ -1,5 +1,5 @@
 import { Component, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
+
 import { FormsModule } from "@angular/forms"
 import { ButtonModule } from "primeng/button"
 import { TableModule } from "primeng/table"
@@ -16,15 +16,14 @@ import  { ProductBacklogService, ProjetService } from "../../services/services"
   selector: "app-scrum-master-product-backlogs",
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ButtonModule,
     TableModule,
     InputTextModule,
     DropdownModule,
     TagModule,
-    ToastModule,
-  ],
+    ToastModule
+],
   template: `
     <div class="container">
       <!-- Header -->

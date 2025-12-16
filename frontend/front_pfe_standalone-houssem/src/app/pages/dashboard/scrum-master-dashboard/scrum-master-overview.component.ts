@@ -1,5 +1,5 @@
 import { Component, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
+
 import { ChartModule } from "primeng/chart"
 import { CardModule } from "primeng/card"
 import { ButtonModule } from "primeng/button"
@@ -12,15 +12,14 @@ import { TimelineModule } from "primeng/timeline"
   selector: "app-scrum-master-overview",
   standalone: true,
   imports: [
-    CommonModule,
     ChartModule,
     CardModule,
     ButtonModule,
     TableModule,
     TagModule,
     ProgressBarModule,
-    TimelineModule,
-  ],
+    TimelineModule
+],
   template: `
     <div class="grid grid-cols-12 gap-6">
       <div class="col-span-12 lg:col-span-3">
@@ -39,7 +38,7 @@ import { TimelineModule } from "primeng/timeline"
           </div>
         </div>
       </div>
-
+    
       <div class="col-span-12 lg:col-span-3">
         <div class="card mb-0 shadow-lg" style="background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%); border: none;">
           <div class="flex justify-between items-center">
@@ -56,7 +55,7 @@ import { TimelineModule } from "primeng/timeline"
           </div>
         </div>
       </div>
-
+    
       <div class="col-span-12 lg:col-span-3">
         <div class="card mb-0 shadow-lg" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none;">
           <div class="flex justify-between items-center">
@@ -73,7 +72,7 @@ import { TimelineModule } from "primeng/timeline"
           </div>
         </div>
       </div>
-
+    
       <div class="col-span-12 lg:col-span-3">
         <div class="card mb-0 shadow-lg" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); border: none;">
           <div class="flex justify-between items-center">
@@ -90,21 +89,21 @@ import { TimelineModule } from "primeng/timeline"
           </div>
         </div>
       </div>
-
+    
       <div class="col-span-12 lg:col-span-8">
         <div class="card">
           <h5 class="text-xl font-semibold mb-4">Sprint Burndown Chart</h5>
           <p-chart type="line" [data]="burndownData" [options]="chartOptions" class="h-80"></p-chart>
         </div>
       </div>
-
+    
       <div class="col-span-12 lg:col-span-4">
         <div class="card">
           <h5 class="text-xl font-semibold mb-4">Team Velocity Trend</h5>
           <p-chart type="bar" [data]="velocityData" [options]="velocityOptions" class="h-80"></p-chart>
         </div>
       </div>
-
+    
       <div class="col-span-12 lg:col-span-8">
         <div class="card">
           <div class="flex justify-between items-center mb-4">
@@ -187,7 +186,7 @@ import { TimelineModule } from "primeng/timeline"
           </p-table>
         </div>
       </div>
-
+    
       <div class="col-span-12 lg:col-span-4">
         <div class="card">
           <div class="flex justify-between items-center mb-4">
@@ -200,30 +199,34 @@ import { TimelineModule } from "primeng/timeline"
             ></p-button>
           </div>
           <div class="space-y-4">
-            <div *ngFor="let blocker of activeBlockersList" class="p-4 border border-red-200 rounded-lg bg-red-50">
-              <div class="flex justify-between items-start mb-2">
-                <h6 class="font-medium text-red-800">{{ blocker.title }}</h6>
-                <p-tag value="High" severity="danger" class="text-xs"></p-tag>
+            @for (blocker of activeBlockersList; track blocker) {
+              <div class="p-4 border border-red-200 rounded-lg bg-red-50">
+                <div class="flex justify-between items-start mb-2">
+                  <h6 class="font-medium text-red-800">{{ blocker.title }}</h6>
+                  <p-tag value="High" severity="danger" class="text-xs"></p-tag>
+                </div>
+                <p class="text-sm text-red-600 mb-3">{{ blocker.description }}</p>
+                <div class="flex justify-between items-center">
+                  <span class="text-xs text-red-500">{{ blocker.daysOpen }} days open</span>
+                  <p-button
+                    label="Resolve"
+                    icon="pi pi-check"
+                    class="p-button-sm p-button-danger"
+                    (click)="resolveBlocker(blocker)"
+                  ></p-button>
+                </div>
               </div>
-              <p class="text-sm text-red-600 mb-3">{{ blocker.description }}</p>
-              <div class="flex justify-between items-center">
-                <span class="text-xs text-red-500">{{ blocker.daysOpen }} days open</span>
-                <p-button
-                  label="Resolve"
-                  icon="pi pi-check"
-                  class="p-button-sm p-button-danger"
-                  (click)="resolveBlocker(blocker)"
-                ></p-button>
+            }
+            @if (activeBlockersList.length === 0) {
+              <div class="text-center py-8 text-gray-500">
+                <i class="pi pi-check-circle text-4xl text-green-500 mb-2"></i>
+                <p>No active blockers!</p>
               </div>
-            </div>
-            <div *ngIf="activeBlockersList.length === 0" class="text-center py-8 text-gray-500">
-              <i class="pi pi-check-circle text-4xl text-green-500 mb-2"></i>
-              <p>No active blockers!</p>
-            </div>
+            }
           </div>
         </div>
       </div>
-
+    
       <div class="col-span-12">
         <div class="card">
           <h5 class="text-xl font-semibold mb-4">Daily Standup Updates</h5>
@@ -238,7 +241,7 @@ import { TimelineModule } from "primeng/timeline"
           </p-timeline>
         </div>
       </div>
-
+    
       <div class="col-span-12">
         <div class="card">
           <h5 class="text-xl font-semibold mb-4">Scrum Master Actions</h5>
@@ -283,7 +286,7 @@ import { TimelineModule } from "primeng/timeline"
         </div>
       </div>
     </div>
-  `,
+    `,
 })
 export class ScrumMasterOverviewComponent implements OnInit {
   currentSprintNumber = 5

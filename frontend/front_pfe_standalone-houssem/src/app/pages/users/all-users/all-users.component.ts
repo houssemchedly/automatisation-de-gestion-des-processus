@@ -1,5 +1,5 @@
 import { Component, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
+
 import { FormsModule } from "@angular/forms"
 import { ButtonModule } from "primeng/button"
 import { TableModule } from "primeng/table"
@@ -68,7 +68,6 @@ interface PageResponse<T> {
   selector: "app-all-users",
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ButtonModule,
     TableModule,
@@ -84,8 +83,8 @@ interface PageResponse<T> {
     TooltipModule,
     MessageModule,
     ProgressSpinnerModule,
-    InputSwitchModule,
-  ],
+    InputSwitchModule
+],
   templateUrl: "./all-users.component.html",
   styleUrl: "./all-users.component.scss",
   providers: [MessageService, ConfirmationService],

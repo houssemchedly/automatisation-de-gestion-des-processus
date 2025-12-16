@@ -1,5 +1,5 @@
 import { Component, type OnInit } from "@angular/core"
-import { CommonModule } from "@angular/common"
+
 import { FormsModule } from "@angular/forms"
 import { ButtonModule } from "primeng/button"
 import { TableModule } from "primeng/table"
@@ -24,7 +24,6 @@ import  { BacklogItemService, ProductBacklogService, ProjetService } from "../..
   selector: "app-backlog-items-by-owner",
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ButtonModule,
     TableModule,
@@ -34,27 +33,27 @@ import  { BacklogItemService, ProductBacklogService, ProjetService } from "../..
     InputNumberModule,
     TagModule,
     ToastModule,
-    ConfirmDialogModule,
-  ],
+    ConfirmDialogModule
+],
   template: `
     <div class="container">
-       Header 
+      Header
       <div class="header">
         <div>
           <h1>My Backlog Items</h1>
           <p class="subtitle">Manage backlog items across all your projects</p>
         </div>
-        <button 
-          pButton 
-          type="button" 
-          label="Add Item" 
+        <button
+          pButton
+          type="button"
+          label="Add Item"
           icon="pi pi-plus"
           class="p-button-success"
           (click)="showAddDialog()">
         </button>
       </div>
-
-       Stats Cards 
+    
+      Stats Cards
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-icon"><i class="pi pi-list"></i></div>
@@ -92,242 +91,244 @@ import  { BacklogItemService, ProductBacklogService, ProjetService } from "../..
           </div>
         </div>
       </div>
-
-       Filters 
+    
+      Filters
       <div class="filters">
         <span class="p-input-icon-left">
           <i class="pi pi-search"></i>
-          <input 
-            type="text" 
-            pInputText 
-            placeholder="Search by title..." 
+          <input
+            type="text"
+            pInputText
+            placeholder="Search by title..."
             [(ngModel)]="searchTerm"
             (keyup.enter)="applyFilters()">
-        </span>
-        <p-dropdown 
-          [(ngModel)]="selectedProjectId" 
-          [options]="projects"
-          optionLabel="nom"
-          optionValue="id"
-          placeholder="All Projects"
-          [showClear]="true"
-          (onChange)="applyFilters()">
-        </p-dropdown>
-        <p-dropdown 
-          [(ngModel)]="filterStatus" 
-          [options]="statusOptions"
-          optionLabel="label"
-          optionValue="value"
-          placeholder="All Statuses"
-          [showClear]="true"
-          (onChange)="applyFilters()">
-        </p-dropdown>
-        <button 
-          pButton 
-          type="button" 
-          icon="pi pi-filter-slash"
-          label="Clear Filters"
-          class="p-button-outlined"
-          (click)="clearFilters()">
-        </button>
-      </div>
-
-       Table 
-      <p-table 
-        [value]="filteredItems" 
-        [(selection)]="selectedItems"
-        [paginator]="true" 
-        [rows]="10"
-        [loading]="loading"
-        [showCurrentPageReport]="true"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
-        [rowsPerPageOptions]="[10, 25, 50]"
-        styleClass="p-datatable-gridlines">
-        
-        <ng-template pTemplate="header">
-          <tr>
-            <th style="width: 3rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
-            <th pSortableColumn="titre">Title <p-sortIcon field="titre"></p-sortIcon></th>
-            <th pSortableColumn="projectName">Project <p-sortIcon field="projectName"></p-sortIcon></th>
-            <th pSortableColumn="priorite">Priority <p-sortIcon field="priorite"></p-sortIcon></th>
-            <th pSortableColumn="points">Points <p-sortIcon field="points"></p-sortIcon></th>
-            <th pSortableColumn="statut">Status <p-sortIcon field="statut"></p-sortIcon></th>
-            <th style="width: 10rem">Actions</th>
-          </tr>
-        </ng-template>
-
-        <ng-template pTemplate="body" let-item>
-          <tr>
-            <td><p-tableCheckbox [value]="item"></p-tableCheckbox></td>
-            <td>
-              <div>
-                <strong>{{ item.titre }}</strong>
-                <div class="text-sm text-gray-600" *ngIf="item.description">{{ item.description }}</div>
-              </div>
-            </td>
-            <td>{{ item.projectName }}</td>
-            <td>
-              <p-dropdown 
-                [ngModel]="item.priorite" 
-                [options]="priorityOptions"
-                optionLabel="label"
-                optionValue="value"
-                (onChange)="updatePriority(item, $event.value)">
-              </p-dropdown>
-            </td>
-            <td>{{ item.points || 0 }}</td>
-            <td>
-              <p-dropdown 
-                [ngModel]="item.statut" 
-                [options]="statusOptions"
-                optionLabel="label"
-                optionValue="value"
-                (onChange)="changeStatus(item, $event.value)">
-              </p-dropdown>
-            </td>
-            <td>
-              <button 
-                pButton 
-                type="button" 
-                icon="pi pi-pencil" 
-                class="p-button-text p-button-sm"
-                (click)="editItem(item)">
-              </button>
-              <button 
-                pButton 
-                type="button" 
-                icon="pi pi-trash" 
-                class="p-button-text p-button-sm p-button-danger"
-                (click)="deleteItem(item)">
-              </button>
-            </td>
-          </tr>
-        </ng-template>
-
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="7" class="text-center">
-              <div class="empty-state">
-                <i class="pi pi-inbox"></i>
-                <h3>No backlog items found</h3>
-                <p>Create your first backlog item to get started</p>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </div>
-
-     Add/Edit Dialog 
-    <p-dialog 
-      [(visible)]="displayDialog" 
-      [header]="isEditMode ? 'Edit Backlog Item' : 'Create Backlog Item'"
-      [modal]="true" 
-      [style]="{width: '600px'}">
-      
-      <div class="dialog-content">
-        <div class="field">
-          <label for="project">Project *</label>
-          <p-dropdown 
-            id="project"
-            [(ngModel)]="selectedBacklogId" 
-            [options]="productBacklogs"
-            optionLabel="projectName"
+          </span>
+          <p-dropdown
+            [(ngModel)]="selectedProjectId"
+            [options]="projects"
+            optionLabel="nom"
             optionValue="id"
-            placeholder="Select project"
-            class="w-full"
-            [disabled]="isEditMode">
+            placeholder="All Projects"
+            [showClear]="true"
+            (onChange)="applyFilters()">
           </p-dropdown>
-        </div>
-
-        <div class="field">
-          <label for="titre">Title *</label>
-          <input 
-            id="titre"
-            type="text" 
-            pInputText 
-            [(ngModel)]="currentItem.titre" 
-            placeholder="Enter item title"
-            class="w-full">
-        </div>
-
-        <div class="field">
-          <label for="description">Description</label>
-          <textarea 
-            id="description"
-            pInputTextarea 
-            [(ngModel)]="currentItem.description" 
-            placeholder="Enter item description"
-            rows="3"
-            class="w-full">
-          </textarea>
-        </div>
-
-        <div class="field-group">
-          <div class="field">
-            <label for="priorite">Priority *</label>
-            <p-dropdown 
-              id="priorite"
-              [(ngModel)]="currentItem.priorite" 
-              [options]="priorityOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select priority"
-              class="w-full">
-            </p-dropdown>
-          </div>
-
-          <div class="field">
-            <label for="points">Story Points</label>
-            <p-inputNumber 
-              id="points"
-              [(ngModel)]="currentItem.points" 
-              [min]="0"
-              [max]="100"
-              placeholder="0"
-              class="w-full">
-            </p-inputNumber>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="statut">Status</label>
-          <p-dropdown 
-            id="statut"
-            [(ngModel)]="currentItem.statut" 
+          <p-dropdown
+            [(ngModel)]="filterStatus"
             [options]="statusOptions"
             optionLabel="label"
             optionValue="value"
-            placeholder="Select status"
-            class="w-full">
+            placeholder="All Statuses"
+            [showClear]="true"
+            (onChange)="applyFilters()">
           </p-dropdown>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-filter-slash"
+            label="Clear Filters"
+            class="p-button-outlined"
+            (click)="clearFilters()">
+          </button>
         </div>
+    
+        Table
+        <p-table
+          [value]="filteredItems"
+          [(selection)]="selectedItems"
+          [paginator]="true"
+          [rows]="10"
+          [loading]="loading"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} items"
+          [rowsPerPageOptions]="[10, 25, 50]"
+          styleClass="p-datatable-gridlines">
+    
+          <ng-template pTemplate="header">
+            <tr>
+              <th style="width: 3rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+              <th pSortableColumn="titre">Title <p-sortIcon field="titre"></p-sortIcon></th>
+              <th pSortableColumn="projectName">Project <p-sortIcon field="projectName"></p-sortIcon></th>
+              <th pSortableColumn="priorite">Priority <p-sortIcon field="priorite"></p-sortIcon></th>
+              <th pSortableColumn="points">Points <p-sortIcon field="points"></p-sortIcon></th>
+              <th pSortableColumn="statut">Status <p-sortIcon field="statut"></p-sortIcon></th>
+              <th style="width: 10rem">Actions</th>
+            </tr>
+          </ng-template>
+    
+          <ng-template pTemplate="body" let-item>
+            <tr>
+              <td><p-tableCheckbox [value]="item"></p-tableCheckbox></td>
+              <td>
+                <div>
+                  <strong>{{ item.titre }}</strong>
+                  @if (item.description) {
+                    <div class="text-sm text-gray-600">{{ item.description }}</div>
+                  }
+                </div>
+              </td>
+              <td>{{ item.projectName }}</td>
+              <td>
+                <p-dropdown
+                  [ngModel]="item.priorite"
+                  [options]="priorityOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  (onChange)="updatePriority(item, $event.value)">
+                </p-dropdown>
+              </td>
+              <td>{{ item.points || 0 }}</td>
+              <td>
+                <p-dropdown
+                  [ngModel]="item.statut"
+                  [options]="statusOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  (onChange)="changeStatus(item, $event.value)">
+                </p-dropdown>
+              </td>
+              <td>
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-pencil"
+                  class="p-button-text p-button-sm"
+                  (click)="editItem(item)">
+                </button>
+                <button
+                  pButton
+                  type="button"
+                  icon="pi pi-trash"
+                  class="p-button-text p-button-sm p-button-danger"
+                  (click)="deleteItem(item)">
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+    
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7" class="text-center">
+                <div class="empty-state">
+                  <i class="pi pi-inbox"></i>
+                  <h3>No backlog items found</h3>
+                  <p>Create your first backlog item to get started</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
-
-      <ng-template pTemplate="footer">
-        <button 
-          pButton 
-          type="button" 
-          label="Cancel" 
-          icon="pi pi-times"
-          class="p-button-text"
-          (click)="displayDialog = false">
-        </button>
-        <button 
-          pButton 
-          type="button" 
-          [label]="isEditMode ? 'Update' : 'Create'" 
-          icon="pi pi-check"
-          class="p-button-primary"
-          [disabled]="!isFormValid()"
-          (click)="saveItem()">
-        </button>
-      </ng-template>
-    </p-dialog>
-
-    <p-toast></p-toast>
-    <p-confirmDialog></p-confirmDialog>
-  `,
+    
+      Add/Edit Dialog
+      <p-dialog
+        [(visible)]="displayDialog"
+        [header]="isEditMode ? 'Edit Backlog Item' : 'Create Backlog Item'"
+        [modal]="true"
+        [style]="{width: '600px'}">
+    
+        <div class="dialog-content">
+          <div class="field">
+            <label for="project">Project *</label>
+            <p-dropdown
+              id="project"
+              [(ngModel)]="selectedBacklogId"
+              [options]="productBacklogs"
+              optionLabel="projectName"
+              optionValue="id"
+              placeholder="Select project"
+              class="w-full"
+              [disabled]="isEditMode">
+            </p-dropdown>
+          </div>
+    
+          <div class="field">
+            <label for="titre">Title *</label>
+            <input
+              id="titre"
+              type="text"
+              pInputText
+              [(ngModel)]="currentItem.titre"
+              placeholder="Enter item title"
+              class="w-full">
+            </div>
+    
+            <div class="field">
+              <label for="description">Description</label>
+              <textarea
+                id="description"
+                pInputTextarea
+                [(ngModel)]="currentItem.description"
+                placeholder="Enter item description"
+                rows="3"
+                class="w-full">
+              </textarea>
+            </div>
+    
+            <div class="field-group">
+              <div class="field">
+                <label for="priorite">Priority *</label>
+                <p-dropdown
+                  id="priorite"
+                  [(ngModel)]="currentItem.priorite"
+                  [options]="priorityOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select priority"
+                  class="w-full">
+                </p-dropdown>
+              </div>
+    
+              <div class="field">
+                <label for="points">Story Points</label>
+                <p-inputNumber
+                  id="points"
+                  [(ngModel)]="currentItem.points"
+                  [min]="0"
+                  [max]="100"
+                  placeholder="0"
+                  class="w-full">
+                </p-inputNumber>
+              </div>
+            </div>
+    
+            <div class="field">
+              <label for="statut">Status</label>
+              <p-dropdown
+                id="statut"
+                [(ngModel)]="currentItem.statut"
+                [options]="statusOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select status"
+                class="w-full">
+              </p-dropdown>
+            </div>
+          </div>
+    
+          <ng-template pTemplate="footer">
+            <button
+              pButton
+              type="button"
+              label="Cancel"
+              icon="pi pi-times"
+              class="p-button-text"
+              (click)="displayDialog = false">
+            </button>
+            <button
+              pButton
+              type="button"
+              [label]="isEditMode ? 'Update' : 'Create'"
+              icon="pi pi-check"
+              class="p-button-primary"
+              [disabled]="!isFormValid()"
+              (click)="saveItem()">
+            </button>
+          </ng-template>
+        </p-dialog>
+    
+        <p-toast></p-toast>
+        <p-confirmDialog></p-confirmDialog>
+    `,
   styles: [
     `
     .container { padding: 2rem; }

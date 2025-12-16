@@ -1,12 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+/* Global styles */
 @use './tailwind.css';
 @use './assets/layout/layout.scss';
 @use 'primeicons/primeicons.css';
 @use './assets/demo/demo.scss';
+
+/* BPMN core */
 @import 'bpmn-js/dist/assets/diagram-js.css';
 @import 'bpmn-js/dist/assets/bpmn-js.css';
 @import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css';
-@import 'bpmn-js-properties-panel/dist/assets/properties-panel.css';
+
+/* BPMN extensions */
+@import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
 @import 'diagram-js-minimap/assets/diagram-js-minimap.css';
-
-
