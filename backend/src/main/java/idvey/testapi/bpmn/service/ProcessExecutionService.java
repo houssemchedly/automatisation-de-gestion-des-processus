@@ -41,7 +41,10 @@ public class ProcessExecutionService {
         BpmnModel bpmnModel = bpmnModelRepository.findByKey(processKey)
                 .orElseThrow(() -> new RuntimeException("BPMN Model not found"));
 
-        if (bpmnModel.getStatus() != BpmnModel.BpmnStatus.ACTIVE) {
+        if (bpmnModel.getStatus() == BpmnModel.BpmnStatus.DEPLOYED) {
+            bpmnModel.setStatus(BpmnModel.BpmnStatus.ACTIVE);
+            bpmnModelRepository.save(bpmnModel);
+        } else if (bpmnModel.getStatus() != BpmnModel.BpmnStatus.ACTIVE) {
             throw new RuntimeException("Process is not active");
         }
 

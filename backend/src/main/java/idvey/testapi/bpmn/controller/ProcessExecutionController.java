@@ -27,7 +27,7 @@ public class ProcessExecutionController {
             @PathVariable String processKey,
             @RequestBody(required = false) Map<String, Object> variables,
             Principal principal) {
-        var user = userRepository.findByNom(principal.getName())
+        var user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         ProcessInstanceResponse response = processExecutionService.startProcessInstance(processKey, user.getId(), variables);
         return ResponseEntity.ok(response);
@@ -59,7 +59,7 @@ public class ProcessExecutionController {
             @PathVariable String camundaTaskId,
             @RequestBody(required = false) Map<String, Object> variables,
             Principal principal) {
-        var user = userRepository.findByNom(principal.getName())
+        var user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         processExecutionService.completeUserTask(camundaTaskId, user.getId(), variables);
         return ResponseEntity.noContent().build();
@@ -72,7 +72,7 @@ public class ProcessExecutionController {
     public ResponseEntity<Void> claimUserTask(
             @PathVariable String camundaTaskId,
             Principal principal) {
-        var user = userRepository.findByNom(principal.getName())
+        var user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         processExecutionService.claimUserTask(camundaTaskId, user.getId());
         return ResponseEntity.noContent().build();

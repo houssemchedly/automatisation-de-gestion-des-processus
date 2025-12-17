@@ -5,11 +5,19 @@ import idvey.testapi.bpmn.dto.BpmnModelResponse;
 import idvey.testapi.bpmn.service.BpmnModelService;
 import idvey.testapi.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.io.StringReader;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 @RestController
 @RequestMapping("/bpmn/editor")
@@ -23,7 +31,7 @@ public class BpmnEditorController {
      * Save BPMN editor content to model
      */
     @PostMapping("/{id}/save")
-    @PreAuthorize("hasRole('SCRUM_MASTER')")
+    @PreAuthorize("hasAuthority('SCRUM_MASTER')")
     public ResponseEntity<BpmnModelResponse> saveBpmnEditor(
             @PathVariable Long id,
             @RequestBody BpmnEditorRequest request,
@@ -55,14 +63,13 @@ public class BpmnEditorController {
     @PostMapping("/validate")
     public ResponseEntity<ValidationResponse> validateBpmnXml(@RequestBody BpmnEditorRequest request) {
         try {
-            // Basic validation - check if XML is well-formed
             validateXmlStructure(request.getBpmnXml());
             return ResponseEntity.ok(ValidationResponse.builder()
                     .valid(true)
                     .message("BPMN XML is valid")
                     .build());
         } catch (Exception e) {
-            return ResponseEntity.ok(ValidationResponse.builder()
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ValidationResponse.builder()
                     .valid(false)
                     .message("Invalid BPMN XML: " + e.getMessage())
                     .build());
@@ -70,10 +77,29 @@ public class BpmnEditorController {
     }
 
     private void validateXmlStructure(String bpmnXml) throws Exception {
-        // Simple validation - would use XML parser in production
-        if (!bpmnXml.contains("<bpmn2:definitions") || !bpmnXml.contains("</bpmn2:definitions>")) {
-            throw new Exception("Missing BPMN definitions");
+        try {
+            Document document = createDocument(bpmnXml);
+
+            var root = document.getDocumentElement();
+            if (root == null || !"definitions".equals(root.getLocalName())) {
+                throw new Exception("Missing BPMN definitions root element");
+            }
+
+            String namespace = root.getNamespaceURI();
+            if (namespace == null || !(namespace.contains("http://www.omg.org/spec/BPMN/20100524/MODEL")
+                    || namespace.contains("http://bpmn.io/schema/bpmn"))) {
+                throw new Exception("Invalid BPMN namespace");
+            }
+        } catch (ParserConfigurationException | SAXException e) {
+            throw new Exception("Malformed BPMN XML: " + e.getMessage());
         }
+    }
+
+    private Document createDocument(String xmlContent) throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        var builder = factory.newDocumentBuilder();
+        return builder.parse(new InputSource(new StringReader(xmlContent)));
     }
 
     @lombok.Getter

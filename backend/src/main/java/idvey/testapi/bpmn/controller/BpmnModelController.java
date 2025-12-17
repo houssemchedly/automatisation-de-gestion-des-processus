@@ -25,11 +25,11 @@ public class BpmnModelController {
      * Create a new BPMN model (only Scrum Master)
      */
     @PostMapping
-    @PreAuthorize("hasRole('SCRUM_MASTER')")
+    @PreAuthorize("hasAuthority('SCRUM_MASTER')")
     public ResponseEntity<BpmnModelResponse> createBpmnModel(
             @RequestBody BpmnModelRequest request,
             Principal principal) {
-        var user = userRepository.findByNom(principal.getName())
+        var user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         BpmnModelResponse response = bpmnModelService.saveBpmnModel(request, user.getId());
         return ResponseEntity.ok(response);
@@ -39,12 +39,12 @@ public class BpmnModelController {
      * Update BPMN model (only creator and Scrum Master)
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('SCRUM_MASTER')")
+    @PreAuthorize("hasAuthority('SCRUM_MASTER')")
     public ResponseEntity<BpmnModelResponse> updateBpmnModel(
             @PathVariable Long id,
             @RequestBody BpmnModelRequest request,
             Principal principal) {
-        var user = userRepository.findByNom(principal.getName())
+        var user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         BpmnModelResponse response = bpmnModelService.updateBpmnModel(id, request, user.getId());
         return ResponseEntity.ok(response);
@@ -54,11 +54,11 @@ public class BpmnModelController {
      * Deploy BPMN model to Camunda engine (only Scrum Master)
      */
     @PostMapping("/{id}/deploy")
-    @PreAuthorize("hasRole('SCRUM_MASTER')")
+    @PreAuthorize("hasAuthority('SCRUM_MASTER')")
     public ResponseEntity<BpmnModelResponse> deployBpmnModel(
             @PathVariable Long id,
             Principal principal) {
-        var user = userRepository.findByNom(principal.getName())
+        var user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         BpmnModelResponse response = bpmnModelService.deployBpmnModel(id, user.getId());
         return ResponseEntity.ok(response);
@@ -92,6 +92,15 @@ public class BpmnModelController {
     }
 
     /**
+     * Get all BPMN models (for listings)
+     */
+    @GetMapping
+    public ResponseEntity<List<BpmnModelResponse>> getAllBpmnModels() {
+        List<BpmnModelResponse> response = bpmnModelService.getAllBpmnModels();
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Get all BPMN models created by current user
      */
     @GetMapping("/my-models")
@@ -106,11 +115,11 @@ public class BpmnModelController {
      * Delete BPMN model (only Scrum Master)
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SCRUM_MASTER')")
+    @PreAuthorize("hasAuthority('SCRUM_MASTER')")
     public ResponseEntity<Void> deleteBpmnModel(
             @PathVariable Long id,
             Principal principal) {
-        var user = userRepository.findByNom(principal.getName())
+        var user = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         bpmnModelService.deleteBpmnModel(id, user.getId());
         return ResponseEntity.noContent().build();

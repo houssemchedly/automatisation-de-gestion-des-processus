@@ -32,18 +32,23 @@ spring:
 camunda:
   bpm:
     webapp:
-     enabled: true
-     database:
-       schema-update: true
-     admin-user:
-       id: admin
-       password: admin
-       firstName: Admin
-       lastName: User
-     filter:
-       create: All Tasks
-     run:
-       enabled: false
+      enabled: true
+
+    database:
+      schema-update: true
+
+    admin-user:
+      id: admin
+      password: admin
+      firstName: Admin
+      lastName: User
+
+    filter:
+      create: All Tasks
+
+    run:
+      enabled: false
+
 
 application:
   security:

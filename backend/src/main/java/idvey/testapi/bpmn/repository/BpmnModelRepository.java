@@ -16,4 +16,14 @@ public interface BpmnModelRepository extends JpaRepository<BpmnModel, Long> {
 
     @Query("SELECT b FROM BpmnModel b WHERE b.createdBy.id = :userId ORDER BY b.id DESC")
     List<BpmnModel> findByCreatedByIdOrderByCreatedDateDesc(@Param("userId") Integer userId);
+
+    List<BpmnModel> findByCreatedById(Integer userId);
+
+    @Query("""
+            SELECT b FROM BpmnModel b
+            WHERE lower(b.name) LIKE lower(concat('%', :query, '%'))
+               OR lower(b.key) LIKE lower(concat('%', :query, '%'))
+               OR lower(COALESCE(b.description, '')) LIKE lower(concat('%', :query, '%'))
+            """)
+    List<BpmnModel> searchByQuery(@Param("query") String query);
 }

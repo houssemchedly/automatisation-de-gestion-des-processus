@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  id="Definitions_1"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:process id="scrum_workflow" name="SCRUM End-to-End" isExecutable="true" camunda:historyTimeToLive="180">
+    <bpmn:startEvent id="StartEvent_ProjectKickoff" name="Projet lancé" />
+
+    <bpmn:serviceTask id="Task_AdminSetup" name="Créer utilisateurs &amp; rôles" camunda:type="external" camunda:topic="identity" />
+
+    <bpmn:userTask id="Task_CreateProject" name="Créer projet (PO)" camunda:assignee="PO" />
+
+    <bpmn:userTask id="Task_ManageBacklog" name="Gérer Product Backlog (PO)" camunda:assignee="PO" />
+
+    <bpmn:userTask id="Task_SprintPlanning" name="Planifier sprint &amp; Sprint Backlog (SM)" camunda:assignee="SM" />
+
+    <bpmn:subProcess id="SubProcess_SprintExecution" name="Exécution du sprint" triggeredByEvent="false">
+      <bpmn:startEvent id="StartEvent_SprintStart" name="Sprint démarré" />
+      <bpmn:userTask id="Task_AssignTasks" name="Assigner tâches (SM)" camunda:candidateGroups="SM" />
+      <bpmn:userTask id="Task_WorkOnTasks" name="Tâches Dev" camunda:candidateGroups="Dev" />
+      <bpmn:parallelGateway id="Gateway_DailyAndBlockers" name="Suivi quotidien / Blocages" />
+
+      <bpmn:userTask id="Task_DailyScrum" name="Daily Scrum" camunda:candidateGroups="SM,Dev" />
+      <bpmn:userTask id="Task_RaiseBlocker" name="Signalement blocage" camunda:candidateGroups="Dev" />
+      <bpmn:userTask id="Task_HandleBlocker" name="Suivre / résoudre blocage" camunda:assignee="SM" />
+
+      <bpmn:parallelGateway id="Gateway_Rejoin" name="Synchroniser" />
+      <bpmn:endEvent id="EndEvent_SprintDone" name="Sprint terminé" />
+
+      <bpmn:sequenceFlow id="Flow_Sub_Start_Assign" sourceRef="StartEvent_SprintStart" targetRef="Task_AssignTasks" />
+      <bpmn:sequenceFlow id="Flow_Sub_Assign_Work" sourceRef="Task_AssignTasks" targetRef="Task_WorkOnTasks" />
+      <bpmn:sequenceFlow id="Flow_Sub_Work_Gateway" sourceRef="Task_WorkOnTasks" targetRef="Gateway_DailyAndBlockers" />
+      <bpmn:sequenceFlow id="Flow_Sub_Gateway_Daily" sourceRef="Gateway_DailyAndBlockers" targetRef="Task_DailyScrum" />
+      <bpmn:sequenceFlow id="Flow_Sub_Gateway_Block" sourceRef="Gateway_DailyAndBlockers" targetRef="Task_RaiseBlocker" />
+      <bpmn:sequenceFlow id="Flow_Sub_Daily_Rejoin" sourceRef="Task_DailyScrum" targetRef="Gateway_Rejoin" />
+      <bpmn:sequenceFlow id="Flow_Sub_Block_Handle" sourceRef="Task_RaiseBlocker" targetRef="Task_HandleBlocker" />
+      <bpmn:sequenceFlow id="Flow_Sub_Handle_Rejoin" sourceRef="Task_HandleBlocker" targetRef="Gateway_Rejoin" />
+      <bpmn:sequenceFlow id="Flow_Sub_Rejoin_End" sourceRef="Gateway_Rejoin" targetRef="EndEvent_SprintDone" />
+    </bpmn:subProcess>
+
+    <bpmn:userTask id="Task_SprintReview" name="Sprint Review" camunda:candidateGroups="PO,SM,Dev" />
+    <bpmn:userTask id="Task_Retrospective" name="Rétrospective" camunda:candidateGroups="SM,Dev" />
+    <bpmn:userTask id="Task_UpdateBacklog" name="Mettre à jour Product Backlog" camunda:assignee="PO" />
+
+    <bpmn:exclusiveGateway id="Gateway_MoreScope" name="Autres PBIs ?" default="Flow_EndProject" />
+    <bpmn:endEvent id="EndEvent_ProjectDone" name="Projet terminé" />
+
+    <bpmn:sequenceFlow id="Flow_Start_Admin" sourceRef="StartEvent_ProjectKickoff" targetRef="Task_AdminSetup" />
+    <bpmn:sequenceFlow id="Flow_Admin_Project" sourceRef="Task_AdminSetup" targetRef="Task_CreateProject" />
+    <bpmn:sequenceFlow id="Flow_Project_Backlog" sourceRef="Task_CreateProject" targetRef="Task_ManageBacklog" />
+    <bpmn:sequenceFlow id="Flow_Backlog_Planning" sourceRef="Task_ManageBacklog" targetRef="Task_SprintPlanning" />
+    <bpmn:sequenceFlow id="Flow_Planning_Sprint" sourceRef="Task_SprintPlanning" targetRef="SubProcess_SprintExecution" />
+    <bpmn:sequenceFlow id="Flow_Sprint_Review" sourceRef="SubProcess_SprintExecution" targetRef="Task_SprintReview" />
+    <bpmn:sequenceFlow id="Flow_Review_Retro" sourceRef="Task_SprintReview" targetRef="Task_Retrospective" />
+    <bpmn:sequenceFlow id="Flow_Retro_Update" sourceRef="Task_Retrospective" targetRef="Task_UpdateBacklog" />
+    <bpmn:sequenceFlow id="Flow_Update_Gateway" sourceRef="Task_UpdateBacklog" targetRef="Gateway_MoreScope" />
+    <bpmn:sequenceFlow id="Flow_RepeatSprints" sourceRef="Gateway_MoreScope" targetRef="Task_SprintPlanning">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${more_work == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_EndProject" sourceRef="Gateway_MoreScope" targetRef="EndEvent_ProjectDone" />
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Scrum">
+    <bpmndi:BPMNPlane id="BPMNPlane_Scrum" bpmnElement="scrum_workflow">
+      <bpmndi:BPMNShape id="Shape_StartEvent_ProjectKickoff" bpmnElement="StartEvent_ProjectKickoff">
+        <dc:Bounds x="150" y="180" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_AdminSetup" bpmnElement="Task_AdminSetup">
+        <dc:Bounds x="220" y="160" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_CreateProject" bpmnElement="Task_CreateProject">
+        <dc:Bounds x="400" y="160" width="170" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_ManageBacklog" bpmnElement="Task_ManageBacklog">
+        <dc:Bounds x="610" y="160" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_SprintPlanning" bpmnElement="Task_SprintPlanning">
+        <dc:Bounds x="850" y="160" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SubProcess_SprintExecution" bpmnElement="SubProcess_SprintExecution" isExpanded="true">
+        <dc:Bounds x="1090" y="90" width="540" height="240" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_SprintReview" bpmnElement="Task_SprintReview">
+        <dc:Bounds x="1660" y="160" width="170" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Retrospective" bpmnElement="Task_Retrospective">
+        <dc:Bounds x="1870" y="160" width="170" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_UpdateBacklog" bpmnElement="Task_UpdateBacklog">
+        <dc:Bounds x="2080" y="160" width="190" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_MoreScope" bpmnElement="Gateway_MoreScope" isMarkerVisible="true">
+        <dc:Bounds x="2305" y="175" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndEvent_ProjectDone" bpmnElement="EndEvent_ProjectDone">
+        <dc:Bounds x="2420" y="180" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_StartEvent_SprintStart" bpmnElement="StartEvent_SprintStart">
+        <dc:Bounds x="1120" y="170" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_AssignTasks" bpmnElement="Task_AssignTasks">
+        <dc:Bounds x="1180" y="150" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_WorkOnTasks" bpmnElement="Task_WorkOnTasks">
+        <dc:Bounds x="1340" y="150" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_DailyAndBlockers" bpmnElement="Gateway_DailyAndBlockers" isMarkerVisible="true">
+        <dc:Bounds x="1515" y="165" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_DailyScrum" bpmnElement="Task_DailyScrum">
+        <dc:Bounds x="1595" y="90" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_RaiseBlocker" bpmnElement="Task_RaiseBlocker">
+        <dc:Bounds x="1595" y="210" width="130" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_HandleBlocker" bpmnElement="Task_HandleBlocker">
+        <dc:Bounds x="1745" y="210" width="140" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Rejoin" bpmnElement="Gateway_Rejoin" isMarkerVisible="true">
+        <dc:Bounds x="1905" y="165" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndEvent_SprintDone" bpmnElement="EndEvent_SprintDone">
+        <dc:Bounds x="1990" y="170" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_Start_Admin" bpmnElement="Flow_Start_Admin">
+        <di:waypoint x="186" y="198" />
+        <di:waypoint x="220" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Admin_Project" bpmnElement="Flow_Admin_Project">
+        <di:waypoint x="370" y="198" />
+        <di:waypoint x="400" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Project_Backlog" bpmnElement="Flow_Project_Backlog">
+        <di:waypoint x="570" y="198" />
+        <di:waypoint x="610" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Backlog_Planning" bpmnElement="Flow_Backlog_Planning">
+        <di:waypoint x="800" y="198" />
+        <di:waypoint x="850" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Planning_Sprint" bpmnElement="Flow_Planning_Sprint">
+        <di:waypoint x="1040" y="198" />
+        <di:waypoint x="1090" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Sprint_Review" bpmnElement="Flow_Sprint_Review">
+        <di:waypoint x="1630" y="198" />
+        <di:waypoint x="1660" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Review_Retro" bpmnElement="Flow_Review_Retro">
+        <di:waypoint x="1830" y="198" />
+        <di:waypoint x="1870" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Retro_Update" bpmnElement="Flow_Retro_Update">
+        <di:waypoint x="2040" y="198" />
+        <di:waypoint x="2080" y="198" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Update_Gateway" bpmnElement="Flow_Update_Gateway">
+        <di:waypoint x="2270" y="198" />
+        <di:waypoint x="2305" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_RepeatSprints" bpmnElement="Flow_RepeatSprints">
+        <di:waypoint x="2355" y="200" />
+        <di:waypoint x="2355" y="120" />
+        <di:waypoint x="945" y="120" />
+        <di:waypoint x="945" y="160" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_EndProject" bpmnElement="Flow_EndProject">
+        <di:waypoint x="2355" y="225" />
+        <di:waypoint x="2420" y="198" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_Sub_Start_Assign" bpmnElement="Flow_Sub_Start_Assign">
+        <di:waypoint x="1156" y="188" />
+        <di:waypoint x="1180" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Sub_Assign_Work" bpmnElement="Flow_Sub_Assign_Work">
+        <di:waypoint x="1320" y="190" />
+        <di:waypoint x="1340" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Sub_Work_Gateway" bpmnElement="Flow_Sub_Work_Gateway">
+        <di:waypoint x="1480" y="190" />
+        <di:waypoint x="1515" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Sub_Gateway_Daily" bpmnElement="Flow_Sub_Gateway_Daily">
+        <di:waypoint x="1540" y="165" />
+        <di:waypoint x="1540" y="130" />
+        <di:waypoint x="1595" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Sub_Gateway_Block" bpmnElement="Flow_Sub_Gateway_Block">
+        <di:waypoint x="1565" y="215" />
+        <di:waypoint x="1595" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Sub_Daily_Rejoin" bpmnElement="Flow_Sub_Daily_Rejoin">
+        <di:waypoint x="1725" y="130" />
+        <di:waypoint x="1905" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Sub_Block_Handle" bpmnElement="Flow_Sub_Block_Handle">
+        <di:waypoint x="1725" y="250" />
+        <di:waypoint x="1745" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Sub_Handle_Rejoin" bpmnElement="Flow_Sub_Handle_Rejoin">
+        <di:waypoint x="1885" y="250" />
+        <di:waypoint x="1930" y="215" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Sub_Rejoin_End" bpmnElement="Flow_Sub_Rejoin_End">
+        <di:waypoint x="1955" y="190" />
+        <di:waypoint x="1990" y="188" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

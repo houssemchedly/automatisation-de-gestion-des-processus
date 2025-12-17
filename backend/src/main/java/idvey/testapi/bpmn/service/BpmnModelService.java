@@ -66,10 +66,25 @@ public class BpmnModelService {
             throw new OperationNotPermittedException("Only DRAFT models can be updated");
         }
 
-        bpmnModel.setName(request.getName());
-        bpmnModel.setDescription(request.getDescription());
-        bpmnModel.setBpmnXml(request.getBpmnXml());
-        bpmnModel.setDiagram(request.getDiagram());
+        if (request.getName() != null) {
+            bpmnModel.setName(request.getName());
+        }
+
+        if (request.getKey() != null && !request.getKey().isBlank()) {
+            bpmnModel.setKey(request.getKey());
+        }
+
+        if (request.getDescription() != null) {
+            bpmnModel.setDescription(request.getDescription());
+        }
+
+        if (request.getBpmnXml() != null) {
+            bpmnModel.setBpmnXml(request.getBpmnXml());
+        }
+
+        if (request.getDiagram() != null) {
+            bpmnModel.setDiagram(request.getDiagram());
+        }
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -107,7 +122,7 @@ public class BpmnModelService {
 
             // Update model
             bpmnModel.setDeploymentId(deploymentId);
-            bpmnModel.setStatus(BpmnModel.BpmnStatus.DEPLOYED);
+            bpmnModel.setStatus(BpmnModel.BpmnStatus.ACTIVE);
             bpmnModel.setVersion(bpmnModel.getVersion() + 1);
 
             BpmnModel updated = bpmnModelRepository.save(bpmnModel);
@@ -146,11 +161,45 @@ public class BpmnModelService {
     }
 
     /**
+     * Get all BPMN models
+     */
+    public List<BpmnModelResponse> getAllBpmnModels() {
+        return bpmnModelRepository.findAll()
+                .stream()
+                .map(bpmnModelMapper::toBpmnModelResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Get all BPMN models created by user
      */
     public List<BpmnModelResponse> getUserBpmnModels(Integer userId) {
         List<BpmnModel> models = bpmnModelRepository.findByCreatedByIdOrderByCreatedDateDesc(userId);
         return models.stream()
+                .map(bpmnModelMapper::toBpmnModelResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get BPMN models by creator
+     */
+    public List<BpmnModelResponse> getBpmnModelsByCreator(Integer userId) {
+        return bpmnModelRepository.findByCreatedById(userId)
+                .stream()
+                .map(bpmnModelMapper::toBpmnModelResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Search BPMN models
+     */
+    public List<BpmnModelResponse> searchBpmnModels(String query) {
+        if (query == null || query.isBlank()) {
+            return getAllBpmnModels();
+        }
+
+        return bpmnModelRepository.searchByQuery(query)
+                .stream()
                 .map(bpmnModelMapper::toBpmnModelResponse)
                 .collect(Collectors.toList());
     }
